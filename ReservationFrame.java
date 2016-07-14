@@ -20,6 +20,13 @@ public class ReservationFrame extends JFrame {
 	
 	private static Reservation reservation;
 	
+	private static DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+	private static Date date = new Date();
+	private static String currentDate = dateFormat.format(date); //2014/08/06 15:59:48
+	private static int dayNum = Integer.parseInt(currentDate.substring(8, 10));
+	private static int yearNum = Integer.parseInt(currentDate.substring(0, 4));
+	private static int monthNum = Integer.parseInt(currentDate.substring(5, 7));
+	
 	private static JPanel infoPanel;
 	
 	private static JPanel customerPanel;
@@ -35,10 +42,12 @@ public class ReservationFrame extends JFrame {
 	
 	private static JPanel checkInPanel;
 	private static ButtonGroup checkInGroup;
-	private static JComboBox checkInYearBox, checkInMonthBox;
+	//private static JComboBox checkInYearBox;
+	private static JComboBox checkInMonthBox;
 	private static JPanel checkOutPanel;
 	private static ButtonGroup checkOutGroup;
-	private static JComboBox checkOutYearBox, checkOutMonthBox;
+	//private static JComboBox checkOutYearBox;
+	private static JComboBox checkOutMonthBox;
 	
 	private static JButton searchButton;
 	
@@ -59,11 +68,7 @@ public class ReservationFrame extends JFrame {
 	public static void createComponents() {
 		mainPanel = new JPanel(new BorderLayout());
 		
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Date date = new Date();
-		String currentDate = dateFormat.format(date); //2014/08/06 15:59:48
 		
-		int dayNum = Integer.parseInt(currentDate.substring(8, 10));
 		
 		infoPanel = new JPanel();
 		
@@ -111,27 +116,24 @@ public class ReservationFrame extends JFrame {
 		checkInGroup = new ButtonGroup();
 		String[] years = { "2016", "2017", "2018", "2019", "2020", "2021", "2022" };
 		String[] months = { "January", "Febuary", "March", "April", "May", "June", "July", "August",
-							"September", "October", "November", "December" };
-		int yearNum = Integer.parseInt(currentDate.substring(0, 4));
-		int monthNum = Integer.parseInt(currentDate.substring(5, 7));
-		String[] normalPossibleMonths = { months[monthNum - 1], months[monthNum]  };
+							"September", "October", "November", "December", "The secret one" };
+		String[] normalPossibleMonths = { months[monthNum - 1], months[monthNum] };
 		String[] decemberPossibleMonths = { months[11], months[0] };
-		checkInYearBox = new JComboBox(years);
+		//checkInYearBox = new JComboBox(years);
 		if (monthNum < 12) {
 			checkInMonthBox = new JComboBox(normalPossibleMonths);
 		}
 		else {
 			checkInMonthBox = new JComboBox(decemberPossibleMonths);
 		}
-		checkInYearBox.setSelectedIndex(yearNum - 2016);
+		//checkInYearBox.setSelectedIndex(yearNum - 2016);
 		//checkInMonthBox.setSelectedIndex(monthNum - 1);
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 3; i++) {
 			checkInPanel.add(new JLabel(""));
 		}
 		checkInPanel.add(checkInMonthBox);
-		checkInPanel.add(new JLabel(""));
-		checkInPanel.add(checkInYearBox);
-		for (int i = 0; i < 2; i++) {
+		//checkInPanel.add(checkInYearBox);
+		for (int i = 0; i < 3; i++) {
 			checkInPanel.add(new JLabel(""));
 		}
 		for (int i = 1; i < 32; i++) {
@@ -148,26 +150,28 @@ public class ReservationFrame extends JFrame {
 		checkOutPanel = new JPanel(new GridLayout(6, 7));
 		checkOutPanel.setBorder(new TitledBorder("Check Out"));
 		checkOutGroup = new ButtonGroup();
-		checkOutYearBox = new JComboBox(years);
+		//checkOutYearBox = new JComboBox(years);
 		if (monthNum < 12) {
 			checkOutMonthBox = new JComboBox(normalPossibleMonths);
 		}
 		else {
 			checkOutMonthBox = new JComboBox(decemberPossibleMonths);
 		}
-		checkOutYearBox.setSelectedIndex(yearNum - 2016);
+		//checkOutYearBox.setSelectedIndex(yearNum - 2016);
 		//checkOutMonthBox.setSelectedIndex(monthNum - 1);
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 3; i++) {
 			checkOutPanel.add(new JLabel(""));
 		}
 		checkOutPanel.add(checkOutMonthBox);
-		checkOutPanel.add(new JLabel(""));
-		checkOutPanel.add(checkOutYearBox);
-		for (int i = 0; i < 2; i++) {
+		//checkOutPanel.add(checkOutYearBox);
+		for (int i = 0; i < 3; i++) {
 			checkOutPanel.add(new JLabel(""));
 		}
 		for (int i = 1; i < 32; i++) {
 			JRadioButton button = new JRadioButton(i + "");
+			if (i <= dayNum) {
+				button.setEnabled(false);
+			}
 			button.setActionCommand(i + "");
 			checkOutPanel.add(button);
 			checkOutGroup.add(button);
@@ -262,12 +266,27 @@ public class ReservationFrame extends JFrame {
 				boolean datesAreValid = true;
 				
 				int potentialCheckInDay = Integer.parseInt(checkInGroup.getSelection().getActionCommand());
-				int potentialCheckInMonth = checkInMonthBox.getSelectedIndex() + 1;
-				int potentialCheckInYear = Integer.parseInt(checkInYearBox.getSelectedItem() + "");
+				int potentialCheckInMonth = monthNum + checkInMonthBox.getSelectedIndex();	
+				if (potentialCheckInMonth == 13) {
+					potentialCheckInMonth = 1;
+				}
+				int potentialCheckInYear = yearNum;
 				
 				int potentialCheckOutDay = Integer.parseInt(checkOutGroup.getSelection().getActionCommand());
-				int potentialCheckOutMonth = checkOutMonthBox.getSelectedIndex() + 1;
-				int potentialCheckOutYear = Integer.parseInt(checkOutYearBox.getSelectedItem() + "");
+				int potentialCheckOutMonth = monthNum + checkOutMonthBox.getSelectedIndex();
+				if (potentialCheckOutMonth == 13) {
+					potentialCheckOutMonth = 1;
+				}
+				int potentialCheckOutYear = yearNum;
+				if (monthNum == 12) {
+					if (checkInMonthBox.getSelectedIndex() == 1) {
+						potentialCheckInYear++; 
+					}
+					if (checkOutMonthBox.getSelectedIndex() == 1) {
+						potentialCheckOutYear++;
+					}
+				}
+				
 				
 				if (potentialCheckOutYear < potentialCheckInYear || potentialCheckOutYear - potentialCheckInYear > 1) {
 					datesAreValid = false;
